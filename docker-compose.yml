@@ -1,0 +1,48 @@
+# sim_post_cap_backend/docker-compose.yml
+version: '3.8'
+
+services:
+  db:
+    image: postgres:15-alpine
+    container_name: simpostcap_postgres_db
+    environment:
+      POSTGRES_USER: ${DB_USER:-postgres}
+      POSTGRES_PASSWORD: ${DB_PASSWORD:-your_very_secret_password}
+      POSTGRES_DB: ${DB_NAME:-simpostcap_db}
+      PGDATA: /var/lib/postgresql/data/pgdata
+    volumes:
+      - postgres_data:/var/lib/postgresql/data/pgdata # Маппинг именованного volume для сохранения данных
+      # Можно также добавить скрипты для инициализации БД, если нужно:
+      # - ./init-db.sh:/docker-entrypoint-initdb.d/init-db.sh
+    ports:
+      - "${DB_PORT:-5432}:5432"
+    restart: unless-stopped
+    healthcheck:
+      test: ["CMD-SHELL", "pg_isready -U ${DB_USER:-postgres} -d ${DB_NAME:-simpostcap_db}"]
+      interval: 10s
+      timeout: 5s
+      retries: 5
+
+  # Опционально: UI-инструмент для PostgreSQL, например, pgAdmin или Adminer
+  # pgAdmin (более тяжеловесный, но полнофункциональный)
+  pgadmin:
+    image: dpage/pgadmin4:latest
+    container_name: simpostcap_pgadmin
+    environment:
+      PGADMIN_DEFAULT_EMAIL: ${PGADMIN_EMAIL:-admin@example.com}
+      PGADMIN_DEFAULT_PASSWORD: ${PGADMIN_PASSWORD:-admin}
+      PGADMIN_LISTEN_PORT: 80
+    ports:
+      - "${PGADMIN_PORT:-5050}:80" # Маппинг порта pgAdmin на хост
+    volumes:
+      - pgadmin_data:/var/lib/pgadmin # Сохранение данных pgAdmin
+    depends_on:
+      db: # pgAdmin запустится после успешного запуска и healthcheck'а db
+        condition: service_healthy
+    restart: unless-stopped
+
+volumes:
+  postgres_data: # Именованный volume для PostgreSQL
+    driver: local
+  pgadmin_data: # Именованный volume для pgAdmin (если используется)
+    driver: local

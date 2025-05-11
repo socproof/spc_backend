@@ -1,0 +1,34 @@
+# sim_post_cap_backend/.gitignore
+
+# IDE and OS files
+.idea/
+*.iml
+*.iws
+.DS_Store
+
+# Python virtual environment
+.venv/
+venv/
+ENV/
+
+# Python cache files
+__pycache__/
+*.py[cod]
+*$py.class
+
+# Poetry
+# poetry.lock is usually committed, poetry.toml is not sensitive
+# However, if poetry.toml contained sensitive URLs for private repos, it might be gitignored.
+
+# Sensitive configuration files
+params.yaml
+
+# Build artifacts
+dist/
+build/
+*.egg-info/
+
+# Other
+*.log
+*.sqlite3
+.env
